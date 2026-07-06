@@ -1,0 +1,336 @@
+/* ─── Variables ──────────────────────────────────────────────────────────── */
+:root {
+    --color-primary:      #c0392b;
+    --color-primary-dark: #a93226;
+    --color-primary-muted:#e0a09a;
+    --color-bg:           #ffffff;
+    --color-surface:      #fafafa;
+    --color-border:       #e0e0e0;
+    --color-text:         #1a1a2e;
+    --color-text-muted:   #555;
+    --color-cancel-bg:    #f0f0f0;
+    --color-cancel-text:  #444;
+    --color-contexto-bg:  #f4f6fb;
+    --color-contexto-border: #3a6cca;
+    --radius:             6px;
+    --transition:         0.18s ease;
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--color-bg);
+    padding: 20px 24px 24px;
+    color: var(--color-text);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ─── Título ─────────────────────────────────────────────────────────────── */
+h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--color-primary);
+    letter-spacing: -0.01em;
+}
+
+/* ─── Banner de contexto del registro origen ─────────────────────────────── */
+#contexto-origen {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: var(--color-contexto-bg);
+    border-left: 3px solid var(--color-contexto-border);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    min-height: 34px;
+    transition: opacity var(--transition);
+}
+
+#contexto-origen.oculto {
+    display: none;
+}
+
+.contexto-modulo {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--color-contexto-border);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.contexto-modulo::after {
+    content: "·";
+    margin-left: 6px;
+    color: var(--color-border);
+}
+
+.contexto-nombre {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.contexto-fase {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #fff;
+    background: #3a6cca;
+    border-radius: 10px;
+    padding: 1px 8px;
+    white-space: nowrap;
+}
+
+.contexto-error {
+    font-size: 11px;
+    color: var(--color-primary);
+}
+
+/* ─── Skeleton de carga del contexto ─────────────────────────────────────── */
+.contexto-skeleton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.skeleton-line {
+    display: inline-block;
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #dde3f0 25%, #edf0f7 50%, #dde3f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.skeleton-modulo { width: 60px; }
+.skeleton-nombre { width: 120px; }
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ─── Formulario ─────────────────────────────────────────────────────────── */
+#form-reportar {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+    margin-top: 14px;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+select,
+textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--color-text);
+    background: var(--color-surface);
+    transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23888' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    cursor: pointer;
+}
+
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-bg);
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ─── Botones ────────────────────────────────────────────────────────────── */
+.btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+    justify-content: flex-end;
+}
+
+button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background var(--transition), transform var(--transition), opacity var(--transition);
+    user-select: none;
+}
+
+button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+#btn-cancelar {
+    background: var(--color-cancel-bg);
+    color: var(--color-cancel-text);
+}
+
+#btn-cancelar:hover {
+    background: #e0e0e0;
+}
+
+#btn-reportar {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+#btn-reportar:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+}
+
+#btn-reportar:disabled {
+    background: var(--color-primary-muted);
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.btn-icon {
+    font-size: 10px;
+    line-height: 1;
+    transition: opacity var(--transition);
+}
+
+/* ─── Adjunto de archivo ─────────────────────────────────────────────────── */
+.label-opcional {
+    font-weight: 400;
+    color: var(--color-text-muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 10.5px;
+}
+
+.archivo-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#btn-archivo {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1.5px solid var(--color-border);
+    padding: 7px 14px;
+    font-size: 12.5px;
+    gap: 5px;
+}
+
+#btn-archivo:hover {
+    background: var(--color-cancel-bg);
+    border-color: #bbb;
+}
+
+.archivo-clear {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1.5px solid var(--color-border);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.archivo-clear:hover {
+    background: #fdf0ef;
+    border-color: var(--color-primary-muted);
+    color: var(--color-primary);
+}
+
+.archivo-preview {
+    margin-top: 5px;
+    font-size: 11.5px;
+    color: var(--color-text-muted);
+    min-height: 16px;
+    word-break: break-all;
+}
+
+.archivo-preview.archivo-ok {
+    color: #1e7e45;
+    background: #eafaf1;
+    border-radius: var(--radius);
+    padding: 4px 8px;
+}
+
+/* ─── Mensaje de estado ──────────────────────────────────────────────────── */
+.mensaje-estado {
+    margin-top: 14px;
+    font-size: 12px;
+    text-align: center;
+    min-height: 20px;
+    padding: 0 4px;
+    border-radius: var(--radius);
+    transition: background var(--transition), color var(--transition), padding var(--transition);
+}
+
+.mensaje-estado:not(:empty) {
+    padding: 7px 12px;
+}
+
+.mensaje-estado.exito {
+    background: #eafaf1;
+    color: #1e7e45;
+}
+
+.mensaje-estado.error {
+    background: #fdf0ef;
+    color: #c0392b;
+}
+
+.mensaje-estado.cargando {
+    background: #fdf6ec;
+    color: #a07010;
+}

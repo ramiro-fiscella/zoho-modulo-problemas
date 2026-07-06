@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportar Problema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://live.zwidgets.com/js-sdk/1.0.5/ZohoEmbededAppSDK.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <h2>🔴 Reportar Problema</h2>
+
+  <!-- Banner de contexto: se rellena dinámicamente desde app.js -->
+  <div id="contexto-origen" class="oculto" aria-label="Registro de origen"></div>
+
+  <form id="form-reportar" novalidate>
+
+    <label for="problema">Tipo de problema</label>
+    <select id="problema" name="problema">
+      <option value="">— Elegí una opción —</option>
+      <optgroup label="Conversación con Cliente">
+        <option>No sabe el código de garantía</option>
+        <option>No se envía email con pre-aprobación</option>
+        <option>Cliente sin respuesta</option>
+        <option>Preaprobación caducada</option>
+      </optgroup>
+      <optgroup label="Entrega de Comisiones">
+        <option>Comisión no entregada (vencida y pendiente)</option>
+        <option>Comisión no entregada a tiempo (fuera de término)</option>
+        <option>No se genera el ticket de comisiones</option>
+        <option>No se descuenta la comisión en Books</option>
+      </optgroup>
+      <optgroup label="Evaluación de Riesgos">
+        <option>Resolución urgente de riesgos</option>
+        <option>Pedido de excepción comercial de riesgos</option>
+        <option>Hay que recotizar</option>
+        <option>No me deja enviar a evaluación / reevaluación</option>
+        <option>Error en el Cotizador</option>
+      </optgroup>
+      <optgroup label="Firmas de Locación">
+        <option>Firman hoy y el cliente no pagó</option>
+        <option>Aún no se emitió el certificado</option>
+        <option>No se genera el evento de Zoho Sign</option>
+        <option>No trae pagarés / recibo</option>
+      </optgroup>
+      <optgroup label="Incumplimientos">
+        <option>Incumplimiento no se pasa a realizado</option>
+        <option>Incumplimiento sin pagar</option>
+        <option>Incumplimiento pagado fuera de término</option>
+        <option>Monto de incumplimiento cubierto incorrecto</option>
+      </optgroup>
+      <optgroup label="Inmobiliarias">
+        <option>Correo electrónico erróneo en inmobiliaria</option>
+        <option>Porcentaje de comisión incorrecto</option>
+        <option>Inmobiliaria no pertenece al comercial</option>
+        <option>No le llegó el correo del formulario</option>
+        <option>Email con certificado digital no se envía</option>
+        <option>No sale correo a inmobiliaria</option>
+      </optgroup>
+      <optgroup label="Pagos">
+        <option>Fecha de pago incorrecta</option>
+        <option>Valor no coincide con lo esperado</option>
+        <option>Cliente pagó pero no figura como pago/venta</option>
+        <option>Diferencia parcial de pago (Mercado Pago)</option>
+        <option>No aparece el formulario de pagos</option>
+        <option>No puedo modificar o eliminar un pago</option>
+        <option>Factura queda en $0</option>
+        <option>No se genera la factura de anticipo</option>
+        <option>No se genera la domiciliación / débito automático</option>
+      </optgroup>
+      <optgroup label="Reembolsos & Devoluciones">
+        <option>Solicitud de devolución / reembolso</option>
+      </optgroup>
+      <optgroup label="Sistemas">
+        <option>Caída de proveedores</option>
+        <option>Ejecuciones recursivas</option>
+        <option>Errores en configuración</option>
+        <option>No pasa de fase</option>
+        <option>Fase errónea</option>
+      </optgroup>
+      <optgroup label="Renovaciones">
+        <option>No se genera el aviso de renovación próxima</option>
+        <option>Renovación no pasa a estado 'Enviada'</option>
+        <option>El cliente rechazó la renovación y no se actualizó</option>
+        <option>No se genera el contrato de renovación</option>
+      </optgroup>
+      <optgroup label="Documentación y Contratos">
+        <option>Contrato generado con datos incorrectos</option>
+        <option>Adjunto no cargó / quedó vacío</option>
+        <option>Falta firma de alguna de las partes</option>
+        <option>Documento generado duplicado</option>
+      </optgroup>
+      <optgroup label="Usuarios y Accesos">
+        <option>Usuario no ve el módulo que debería</option>
+        <option>Campo o botón no aparece para el usuario</option>
+        <option>Usuario no puede editar un registro</option>
+        <option>Usuario nuevo sin acceso configurado</option>
+      </optgroup>
+      <optgroup label="Notificaciones">
+        <option>No llega email al cliente en ninguna etapa</option>
+        <option>Email llega con datos en blanco o mal formateados</option>
+        <option>Notificación Cliq no se envía</option>
+        <option>El cliente recibe el mismo correo dos veces</option>
+      </optgroup>
+      <optgroup label="Bigin / Referidos">
+        <option>Referido no se sincroniza con CRM</option>
+        <option>Comisión de referido no se genera</option>
+        <option>Referido asignado al comercial incorrecto</option>
+        <option>Error en integración con Bigin</option>
+      </optgroup>
+      <option>Otro</option>
+    </select>
+
+    <label for="detalles">Detalles adicionales</label>
+    <textarea id="detalles" name="detalles" placeholder="Describí el problema con más detalle..."></textarea>
+
+    <label for="prioridad">Prioridad</label>
+    <select id="prioridad" name="prioridad">
+      <option value="" selected>— Automática (según tipo) —</option>
+      <option value="Alta">Alta</option>
+      <option value="Media">Media</option>
+      <option value="Baja">Baja</option>
+    </select>
+
+    <label for="archivo-input">Adjunto <span class="label-opcional">(opcional, máx. 10 MB)</span></label>
+    <div class="archivo-row">
+      <button type="button" id="btn-archivo">
+        <span>📎</span> Seleccionar archivo
+      </button>
+      <button type="button" id="archivo-clear" class="archivo-clear" style="display:none;" aria-label="Quitar archivo">&times;</button>
+    </div>
+    <div id="archivo-preview" class="archivo-preview"></div>
+    <input type="file" id="archivo-input" name="archivo" style="display:none;" aria-hidden="true">
+
+    <div class="btn-row">
+      <button type="button" id="btn-cancelar">Cancelar</button>
+      <button type="button" id="btn-reportar">
+        <span class="btn-icon">●</span> Reportar
+      </button>
+    </div>
+
+  </form>
+
+  <div id="mensaje" class="mensaje-estado"></div>
+
+  <script src="js/app.js"></script>
+</body>
+
+</html>
