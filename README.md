@@ -203,17 +203,6 @@ Lo que **no puede hacer hoy** es commitear directo. Así que el flujo por cambio
 
 ---
 
-## Checklist antes de dar un cambio por terminado
-
-- [ ] ¿El código está en el archivo correcto (widget vs. función Deluge)?
-- [ ] Si cambió qué subir o dónde, ¿lo actualicé en este README?
-- [ ] ¿El cambio toca una decisión de negocio (SLA, picklist, asignación)?
-  Si sí, también se refleja en el documento de proyecto y en Notion.
-- [ ] ¿Quedó algún placeholder o TODO nuevo? Anotarlo en `ANALISIS.md` o en la
-  tabla de Decisiones Pendientes del documento de proyecto.
-
----
-
 ## Documentación relacionada
 
 - **Documento de proyecto** — "Proyecto para Sistema de Gestión de Tickets en Zoho CRM".
