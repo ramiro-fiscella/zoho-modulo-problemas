@@ -13,7 +13,7 @@
   nombre de carpeta legado — el módulo separado ya no existe).
 - **Función `problemas_post_create`** con clasificación automática de 60+ tipos en
   14 grupos.
-- **Clasificación aprobada** — el mapeo Tipo → Área afectada / Área responsable /
+- **Clasificación (en revisión)** — el mapeo Tipo → Área afectada / Área responsable /
   Prioridad ya está cerrado a nivel decisión. Si cambia, se toca directo en el Deluge.
 - **Unificación de acceso.** El módulo "Ingreso de Problemas" se eliminó, el botón
   vive ahora dentro del propio módulo Problemas con el mismo nombre que en los
@@ -27,9 +27,6 @@
 
 ### Bloqueante para cerrar la Etapa 1
 
-- **Bug del lookup al registro origen.** A veces no se completa. Por eso están los
-  logs `[DIAG 1]`–`[DIAG 6]` en el Deluge. Hasta que no se confirme resuelto en
-  producción, no se sacan.
 - **Borrado de los campos del grupo "Incidencias"** en el registro origen después
   de crear el ticket (`Problema`, `Detalles_problema`, `Problema_validado`). El
   Deluge actualiza el contador pero no limpia estos tres campos. Puede estar en un
@@ -110,17 +107,14 @@ mapeo va a moverse seguido.
 
 Ordenadas por retorno vs. esfuerzo:
 
-1. **Gestión desde la tarea** (Etapa 3). Que el gestor pueda resolver sin abrir el
-   ticket, completando la tarea de Zoho. Es el cambio que más mueve la adopción en
-   operaciones y administración.
-2. **Tablero de métricas.** Nada mide todavía qué tipos son más recurrentes, tiempo
+1. **Tablero de métricas.** Nada mide todavía qué tipos son más recurrentes, tiempo
    real de resolución, quién resuelve más, cuántos se reabren. Con una vista + un
    par de fórmulas ya hay tablero básico. Es lo primero que va a pedir un líder a
    los dos meses de uso.
-3. **Documentación inteligente en el cierre** (Etapa 5). Arrancar por la Opción A
+2. **Documentación inteligente en el cierre** (Etapa 5). Arrancar por la Opción A
    (tabla en Notion mapeando Tipo → link de doc). Es barata y sirve de piso para
    pasar a n8n o Claude API después.
-4. **UX del reporte** (Etapa 4). Pop-up desde el registro origen en vez de scroll
+3. **UX del reporte** (Etapa 4). Pop-up desde el registro origen en vez de scroll
    hasta el grupo de campos. Se justifica solo si se mide que la fricción está
    frenando reportes.
 
