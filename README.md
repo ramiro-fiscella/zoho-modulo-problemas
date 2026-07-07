@@ -8,9 +8,13 @@ Este repo tiene el **código y los workflows** del módulo. La **documentación 
 (campos, flujos, SLA, decisiones de negocio) vive en Notion, en la página
 **"Módulo Problemas (Ex-Incidencias)"** y en el documento de proyecto.
 
+## Reportar Problema desde el módulo "Problemas"
+
 https://github.com/user-attachments/assets/aee9947a-19e3-4b2c-bc77-451bc247fde3
 
-https://www.awesomescreenshot.com/video/54335478?key=001450c248606cdca5ede5fde82364a9
+## Reportar Problema desde un Trato
+
+https://github.com/user-attachments/assets/26c2a7cf-1573-47d5-bbf8-f1eb7397e2fb
 
 ---
 
