@@ -1,9 +1,8 @@
 # Módulo Problemas — Zoho CRM
 
 Sistema interno de gestión de tickets para GarantíaYa. Los usuarios reportan errores
-técnicos, fallos de automatización o problemas de proceso desde los mismos módulos
-en los que trabajan a diario, y el equipo de Sistemas/Administración los gestiona en
-un módulo dedicado dentro del CRM.
+técnicos, fallos de automatización o problemas de proceso, y el equipo de
+Sistemas/Administración los gestiona en un módulo dedicado dentro del CRM.
 
 Este repo tiene el **código y los workflows** del módulo. La **documentación funcional**
 (campos, flujos, SLA, decisiones de negocio) vive en Notion, en la página
@@ -11,55 +10,79 @@ Este repo tiene el **código y los workflows** del módulo. La **documentación 
 
 ---
 
-## Qué hay acá
+## Cómo se accede
+
+Hay un único botón, se llama **Reportar Problema**, y aparece en dos lugares:
+
+- **Dentro de cada módulo operativo** (Tratos, Renovaciones, Referidos, Comisiones,
+  Riesgo, Operaciones, Incumplimientos, Inmobiliarias, Contactos). Se abre sobre el
+  registro que estás viendo — no pide elegir módulo ni buscar legajo.
+- **Dentro del propio módulo Problemas.** El usuario elige el módulo y busca el
+  legajo a mano. Sirve cuando queremos reportar algo sobre un legajo que no tenemos
+  abierto, o cuando el usuario no tiene acceso al módulo operativo (por ejemplo un
+  comercial reportando sobre Riesgo).
+
+Es el mismo botón conceptualmente y hace lo mismo — solo cambia si el registro
+origen viene resuelto por contexto o si hay que buscarlo. Todo en un mismo lugar
+para el usuario, sin módulos aparte ni saltar entre pantallas.
+
+> **Nota:** en versiones anteriores del sistema existía un módulo separado llamado
+> **"Ingreso de Problemas"**. Ya no existe — su funcionalidad quedó absorbida como
+> segundo botón dentro del módulo Problemas. Si ves referencias a ese módulo en el
+> documento de proyecto o en Notion, están desactualizadas.
+
+---
+
+## Qué hay en el repo
 
 ```
 zoho-modulo-problemas/
 └── Problemas/
     ├── README.md                            ← este archivo
-    ├── ANALISIS.md                          ← estado del proyecto, pendientes, ideas
-    ├── 01-boton-reportar-problema/          ← widget del botón dentro de cada módulo operativo
-    ├── 02-ingreso-de-problemas/             ← widget standalone del módulo Ingreso de Problemas
-    ├── 03-funcion-deluge/                   ← función post-create que corre al crear un ticket
-    └── 04-workflows/                        ← capturas de los workflows configurados en Zoho
+    ├── ANALISIS.md                          ← estado, pendientes, ideas
+    ├── 01-boton-reportar-problema/          ← widget del botón en módulos origen
+    ├── 02-ingreso-de-problemas/             ← widget del botón dentro del módulo Problemas
+    │                                          (nombre de carpeta legado — ver nota abajo)
+    ├── 03-funcion-deluge/                   ← función post-create
+    └── 04-workflows/                        ← capturas de los workflows de Zoho
 ```
 
-Cada carpeta numerada es un artefacto que se sube a Zoho por separado. Dos widgets,
-una función, y los workflows que los pegan entre sí.
+> El nombre de carpeta `02-ingreso-de-problemas/` es legado del módulo que ya no
+> existe. La carpeta sigue conteniendo el código correcto (el segundo widget), solo
+> quedó con el nombre viejo. Cuando toque, se renombra en un commit propio a algo
+> como `02-boton-reportar-problema-standalone/` — no urgente, no bloquea nada.
 
 ---
 
 ## Cómo se implementa
 
-### 1. Widget del botón — dentro de cada módulo operativo
+### 1. Widget de Reportar Problema — módulos origen
 
 Carpeta: `01-boton-reportar-problema/`
-
-Es el widget que se abre cuando el usuario aprieta 🔴 **Problema** desde un registro
-de Tratos, Renovaciones, etc. Se abre directo sobre el registro — no pide elegir
-módulo ni buscar legajo.
 
 **Subir a Zoho:**
 Setup → Developer Hub → Widgets → nuevo widget → Index File: `widget.html`.
 
-**Configurar botón en cada módulo:**
+**Configurar el botón en cada módulo operativo:**
 Setup → Customization → Modules and Fields → módulo → Links and Buttons → nuevo
-botón que abre este widget en una popup.
+botón "Reportar Problema" que abre este widget en una popup.
 
-### 2. Widget de Ingreso de Problemas — módulo standalone
+Módulos donde va: Tratos, Renovaciones, Referidos, Comisiones, Riesgo, Operaciones,
+Incumplimientos, Inmobiliarias, Contactos.
+
+### 2. Widget de Reportar Problema — módulo Problemas
 
 Carpeta: `02-ingreso-de-problemas/`
 
-Widget para el módulo **Ingreso de Problemas**. Sirve cuando el usuario no puede o
-no quiere abrir el ticket desde el módulo operativo (típicamente comerciales que no
-tienen acceso a ciertos módulos, o alguien que quiere reportar sobre un legajo que
-no gestiona).
+Es un widget separado del anterior aunque hace algo parecido: el usuario elige el
+módulo, busca el legajo, y crea el ticket. Se sube **como widget aparte** en Zoho.
 
-El usuario elige el módulo, busca el legajo, y el widget hace lo mismo que el del
-botón — pero desde otro punto de entrada.
+**Subir a Zoho:** mismo procedimiento que el widget anterior, pero como widget
+distinto.
 
-**Subir a Zoho:** mismo procedimiento que el widget anterior, pero **como widget
-separado**. Son dos widgets distintos.
+**Configurar el botón:**
+Setup → Customization → Modules and Fields → **Problemas** → Links and Buttons →
+nuevo botón "Reportar Problema" que abre este widget.
 
 ### 3. Función Deluge — `problemas_post_create`
 
@@ -68,7 +91,7 @@ Carpeta: `03-funcion-deluge/`
 Corre automáticamente cuando se crea un ticket en el módulo Problemas. Hace:
 
 - Clasifica el ticket (Área afectada, Área responsable, Prioridad) según el tipo
-  de problema. El mapeo son ~60 tipos agrupados en 14 categorías.
+  de problema. Son ~60 tipos agrupados en 14 categorías.
 - Lee el registro origen y arma el título (`Problema N — [Código Legajo]`).
 - Actualiza el contador de incidencias en el registro origen.
 - Deja el lookup al registro origen en el ticket.
@@ -94,20 +117,21 @@ workflows como archivo) — están acá como referencia visual.
   Asignado. Completa la fecha de asignación, cambia la fase a "En curso" y crea la
   tarea para el gestor.
 
-### 5. Configuración de módulo
+### 5. Configuración del módulo
 
-El módulo **Problemas** y el grupo de campos **"Incidencias"** en cada módulo operativo
-(Tratos, Renovaciones, Referidos, Comisiones, Riesgo, Operaciones, Incumplimientos) se
-configuran a mano en Zoho. Los campos exactos están en el documento de proyecto en
-Notion, sección "Módulo de Problemas — Campos".
+El módulo **Problemas** y el grupo de campos **"Incidencias"** en cada módulo
+operativo se configuran a mano en Zoho. Los campos exactos están en el documento
+de proyecto, sección "Módulo de Problemas — Campos".
 
 ---
 
 ## Estado actual
 
-- ✅ Widget del botón funcionando.
-- ✅ Widget de Ingreso de Problemas funcionando.
+- ✅ Widget del botón en módulos origen funcionando.
+- ✅ Widget del botón dentro del módulo Problemas funcionando.
 - ✅ Función post-create con clasificación automática de 60+ tipos.
+- ✅ Unificación de acceso: un solo nombre de botón ("Reportar Problema"), sin
+  módulo separado.
 - ✅ Fix del bug `data.User.id` que rompía el banner y los botones.
 - 🐛 Bug abierto: el lookup al registro origen a veces no se completa. Por eso los
   logs `[DIAG 1]` a `[DIAG 6]` siguen en el Deluge. No se sacan hasta confirmar que
@@ -121,9 +145,8 @@ Para el detalle completo del estado y qué falta, ver **[`ANALISIS.md`](./ANALIS
 
 ## Placeholders sin confirmar
 
-En los widgets y en el Deluge hay campos de configuración marcados con **VERIFICAR**
-que están puestos como placeholder (`"Name"` / `""`) porque no confirmamos los API
-names reales de esos módulos en Zoho:
+En los widgets y en el Deluge hay campos marcados con **VERIFICAR** que están como
+placeholder (`"Name"` / `""`) porque no confirmamos los API names reales de:
 
 - Renovaciones
 - Comisiones
@@ -131,10 +154,10 @@ names reales de esos módulos en Zoho:
 - Incumplimientos
 - Inmobiliarias
 
-Mientras no se confirmen, el título y el banner de contexto van a salir incompletos
-para tickets creados desde esos módulos. **No rompe el flujo** (hay fallback), pero
-se ve feo. Cuando confirmes un API name, avisá y se actualiza esa línea puntual en
-los tres archivos.
+Mientras no se confirmen, el título y el banner de contexto salen incompletos para
+tickets creados desde esos módulos. **No rompe el flujo** (hay fallback), pero se ve
+feo. Cuando confirmes un API name, avisá y se actualiza esa línea puntual en los
+tres archivos.
 
 **Referido y Cobranza:** tienen lookup en el módulo Problemas pero ningún widget los
 ofrece como opción de origen. Hay que definir a qué módulo Zoho real corresponden
@@ -145,7 +168,7 @@ antes de activarlos.
 ## Convenciones del repo
 
 - **Nada de sufijos de versión en el nombre de carpeta** (`v3`, `v5`). El historial
-  lo da git. Si querés marcar un hito, se usa un tag (`v1.0-boton`), no se renombra.
+  lo da git. Si querés marcar un hito, se usa un tag (`v1.0-boton`).
 - **Un commit, un cambio entendible.** Mensajes cortos y en modo:
   `fix: corrige bug data.User.id en botón`,
   `feat: agrega módulo Cobranza a modulosConfig`,
@@ -177,7 +200,7 @@ Lo que **no puede hacer hoy** es commitear directo. Así que el flujo por cambio
 - [ ] ¿El código está en el archivo correcto (widget vs. función Deluge)?
 - [ ] Si cambió qué subir o dónde, ¿lo actualicé en este README?
 - [ ] ¿El cambio toca una decisión de negocio (SLA, picklist, asignación)?
-  Si sí, también se refleja en el documento de proyecto en Notion.
+  Si sí, también se refleja en el documento de proyecto y en Notion.
 - [ ] ¿Quedó algún placeholder o TODO nuevo? Anotarlo en `ANALISIS.md` o en la
   tabla de Decisiones Pendientes del documento de proyecto.
 
@@ -186,6 +209,7 @@ Lo que **no puede hacer hoy** es commitear directo. Así que el flujo por cambio
 ## Documentación relacionada
 
 - **Documento de proyecto** — "Proyecto para Sistema de Gestión de Tickets en Zoho CRM".
-  Visión general, campos completos, flujo operativo, SLA, decisiones pendientes.
+  ⚠️ La sección §8 "Módulo de Ingreso de Problemas" está desactualizada — ese módulo
+  ya no existe, se reemplazó por el segundo botón en el módulo Problemas.
 - **Notion — "Módulo Problemas (Ex-Incidencias)"**. Documentación funcional al día. https://app.notion.com/p/M-dulo-Problemas-Ex-Incidencias-375de18b712c80e98db7ecc841989069
-- **[`ANALISIS.md`](./ANALISIS.md)** — puesta al día del estado, pendientes y mejoras a futuro.
+- **[`ANALISIS.md`](./ANALISIS.md)** — estado, pendientes y mejoras a futuro.
