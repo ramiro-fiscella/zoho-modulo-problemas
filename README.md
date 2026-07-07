@@ -10,6 +10,8 @@ Este repo tiene el **código y los workflows** del módulo. La **documentación 
 
 https://github.com/user-attachments/assets/aee9947a-19e3-4b2c-bc77-451bc247fde3
 
+https://www.awesomescreenshot.com/video/54335478?key=001450c248606cdca5ede5fde82364a9
+
 ---
 
 ## Cómo se accede
