@@ -187,5 +187,5 @@ Lo que **no puede hacer hoy** es commitear directo. Así que el flujo por cambio
 
 - **Documento de proyecto** — "Proyecto para Sistema de Gestión de Tickets en Zoho CRM".
   Visión general, campos completos, flujo operativo, SLA, decisiones pendientes.
-- **Notion — "Módulo Problemas (Ex-Incidencias)"**. Documentación funcional al día.
+- **Notion — "Módulo Problemas (Ex-Incidencias)"**. Documentación funcional al día. https://app.notion.com/p/M-dulo-Problemas-Ex-Incidencias-375de18b712c80e98db7ecc841989069
 - **[`ANALISIS.md`](./ANALISIS.md)** — puesta al día del estado, pendientes y mejoras a futuro.
