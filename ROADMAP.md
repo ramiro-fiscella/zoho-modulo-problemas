@@ -16,7 +16,7 @@
 - [x] Módulo "Ingreso de Problemas" eliminado — todo unificado en un solo botón
 - [x] Función `problemas_post_create` clasificando (área afectada, área
       responsable, prioridad)
-- [ ] 🐛 Bug del lookup al registro origen (a veces no completa) — en diagnóstico
+- [x] 🐛 Bug del lookup al registro origen (a veces no completa) — en diagnóstico
 - [x] Vistas: todos los problemas, por área, estilo Desk, mis problemas
 - [x] Botón "Resolución" + fecha de cierre
 - [x] Workflow de reapertura
