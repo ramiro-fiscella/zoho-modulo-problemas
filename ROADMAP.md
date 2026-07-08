@@ -61,7 +61,7 @@
 
 ## El orden de trabajo
 
-2. Los 5 API names placeholder — es una tarde, no una épica
+2. Los 5 API names placeholder — es una tarde
 3. SLA con el equipo → después sí cerrás asignación completa
 4. Cliq
 5. Permisos por perfil → ahí cae solo lo de ocultar el botón estándar
