@@ -35,9 +35,6 @@
 
 - [ ] `.gitignore` para sacar `Problemas.zip` y `desktop.ini` del repo
 - [ ] Renombrar `02-ingreso-de-problemas/` (el módulo que le da nombre ya no existe)
-- [ ] Actualizar §8 del documento de proyecto (menciona un módulo que ya no está)
-- [ ] Sacar logs `[DIAG]` del Deluge una vez confirmado el fix del lookup
-- [ ] Sacar la clave `"Garantía"` legacy si no hay tickets viejos con ese valor
 
 ## Etapa 3 — Métricas
 
