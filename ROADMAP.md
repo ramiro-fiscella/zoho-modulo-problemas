@@ -23,17 +23,13 @@
 - [ ] Workflow de asignación
   - [x] Fecha de asignación
   - [x] Cambia fase a "En curso"
-  - [ ] Crea la tarea para el gestor
+  - [x] Crea la tarea para el gestor
   - [ ] Setea el SLA en el ticket *(depende de que se defina el SLA, ver abajo)*
-- [ ] Notificaciones Cliq (código listo, falta activar)
+- [x] Notificaciones Cliq
 - [ ] Ocultar botón estándar "Crear" en Problemas *(depende de permisos por
       perfil, ver abajo)*
 - [ ] Permisos por perfil
 - [ ] SLA por prioridad, definido con el equipo
-- [ ] Confirmar API names reales de Renovaciones, Comisiones, Riesgo,
-      Incumplimientos, Inmobiliarias
-- [ ] Decidir qué hacer con "Referido" y "Cobranza" (tienen lookup pero ningún
-      widget los ofrece)
 
 ## Etapa 2 — Prolijidad
 
@@ -63,9 +59,8 @@
 
 ---
 
-## El orden en el que yo lo atacaría
+## El orden de trabajo
 
-1. Bug del lookup (todo lo demás depende un poco de confiar en los datos)
 2. Los 5 API names placeholder — es una tarde, no una épica
 3. SLA con el equipo → después sí cerrás asignación completa
 4. Cliq
