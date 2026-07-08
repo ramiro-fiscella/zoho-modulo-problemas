@@ -1,0 +1,154 @@
+string standalone.problemas_create_standalone(String relacionadoCon, String idOrigen, String problema, String detalles, String prioridad, String reportadoPorId)
+{
+	// =========================================================================
+	// problemas_create_standalone
+	// -------------------------------------------------------------------------
+	// Crea un ticket en el módulo Problemas desde un origen EXTERNO al CRM
+	// (portal propio del área Comercial). Reemplaza lo que hoy hace el widget
+	// con ZOHO.CRM.API.insertRecord: arma el mismo payload "crudo" y crea el
+	// registro. La clasificación / título / contador / nota los sigue haciendo
+	// problemas_post_create, disparado por el workflow "Problemas Post-Create".
+	//
+	// >>> CLAVE: se crea con el trigger {"trigger":{"workflow"}} para que el workflow
+	//     Post-Create se dispare igual que cuando crea el widget. Sin ese
+	//     trigger, zoho.crm.createRecord NO ejecuta workflows y el ticket
+	//     quedaría sin clasificar.
+	//
+	// CONTRATO DE ENTRADA (mismos campos que buildPayload() de los widgets):
+	//   relacionadoCon  → valor del picklist Relacionado_con ("Trato",
+	//                     "Renovación", "Comisión", "Riesgo", "Incumplimiento",
+	//                     "Inmobiliaria", "Contacto"...). Vacío = sin origen.
+	//   idOrigen        → ID del registro origen en su módulo Zoho (string).
+	//                     Solo aplica si relacionadoCon != "".
+	//   problema        → texto EXACTO de la opción del picklist Tipo de problema.
+	//   detalles        → texto libre.
+	//   prioridad       → "Alta"/"Media"/"Baja". Vacío = "Automática"
+	//                     (la resuelve post_create por el mapeo del tipo).
+	//   reportadoPorId  → (opcional) ID de usuario CRM del comercial que reporta.
+	//                     Ver NOTA sobre Reportado_por más abajo.
+	//
+	// DEVUELVE: string JSON -> {"ok":true,"id":"<idTicket>","mensaje":"..."}
+	//           o {"ok":false,"error":"..."} para que el portal reaccione.
+	//
+	// NO duplica la config de módulos a propósito: esta función NO conoce el
+	// mapa modulosConfig. Pasa relacionadoCon tal cual y deja que
+	// problemas_post_create (dueño de esa config) lo resuelva. Así el portal
+	// no se convierte en un 4º archivo que sincronizar por comentario.
+	// =========================================================================
+
+	// ── Normalización de entrada (todo puede llegar vacío desde el portal) ──
+	relacionadoCon = if(relacionadoCon == null,"",relacionadoCon.trim());
+	idOrigen = if(idOrigen == null,"",idOrigen.trim());
+	problema = if(problema == null,"",problema.trim());
+	detalles = if(detalles == null,"",detalles.trim());
+	prioridad = if(prioridad == null,"",prioridad.trim());
+	reportadoPorId = if(reportadoPorId == null,"",reportadoPorId.trim());
+
+	salida = Map();
+
+	// ── Validación (misma regla que validar() del widget) ──────────────────
+	// Al menos tipo de problema o detalle. Evita tickets vacíos desde el portal.
+	if(problema == "" && detalles == "")
+	{
+		salida.put("ok",false);
+		salida.put("error","Debe venir al menos 'problema' (tipo) o 'detalles'.");
+		return salida.toString();
+	}
+
+	// ── Armar payload — MISMO contrato que buildPayload() de los widgets ────
+	dataMap = Map();
+	dataMap.put("Fase","Abierto");
+
+	// Prioridad solo si el usuario eligió una explícita; si no, post_create
+	// la resuelve por el mapeo del tipo.
+	if(prioridad != "")
+	{
+		dataMap.put("Prioridad",prioridad);
+	}
+
+	// Relacionado_con + ID_ticket_relacionado solo si hay origen.
+	// ID_ticket_relacionado es un campo de TEXTO (post_create lo lee como
+	// string y hace idOrigen.toLong()); el lookup real lo setea post_create.
+	if(relacionadoCon != "")
+	{
+		dataMap.put("Relacionado_con",relacionadoCon);
+		if(idOrigen != "")
+		{
+			dataMap.put("ID_ticket_relacionado",idOrigen);
+		}
+	}
+
+	if(problema != "")
+	{
+		dataMap.put("Problema",problema);
+	}
+	if(detalles != "")
+	{
+		dataMap.put("Detalles_problema",detalles);
+	}
+
+	// ── Reportado_por (opcional) ────────────────────────────────────────────
+	// NOTA DE NEGOCIO (VERIFICAR): si el ticket tiene origen, problemas_post_create
+	// PISA Reportado_por con el Owner del registro origen (línea ~277 del Deluge).
+	// O sea: un comercial que reporta sobre un Trato queda registrado como
+	// "reportado por" el dueño del Trato, no como el comercial. Para el flujo
+	// del portal esto probablemente NO es lo que queremos.
+	// Por ahora lo seteamos acá (sirve seguro para tickets SIN origen). Si se
+	// decide que el comercial siempre debe quedar como reportante, hay que tocar
+	// post_create para que no lo pise cuando ya viene seteado. Es decisión de
+	// negocio -> dejar anotado, no cambiarlo en silencio.
+	if(reportadoPorId != "")
+	{
+		repMap = Map();
+		repMap.put("id",reportadoPorId);
+		dataMap.put("Reportado_por",repMap);
+	}
+
+	info "[standalone] payload -> " + dataMap;
+
+	// ── Crear el ticket CON disparo de workflow ─────────────────────────────
+	// El 3er argumento {"trigger":{"workflow"}} hace que se ejecute "Problemas Post-Create"
+	// (que llama a problemas_post_create). Sin él, el workflow NO corre.
+	try 
+	{
+		respCreate = zoho.crm.createRecord("Problemas",dataMap,{"trigger":{"workflow"}});
+		info "[standalone] respCreate -> " + respCreate;
+		nuevoId = "";
+		if(respCreate != null)
+		{
+			nuevoId = ifnull(respCreate.get("id"),"");
+		}
+		if(nuevoId != "" && nuevoId != null)
+		{
+			salida.put("ok",true);
+			salida.put("id",nuevoId.toString());
+			salida.put("mensaje","Ticket creado. La clasificación, el título y el contador los completa el workflow Problemas Post-Create (asíncrono).");
+		}
+		else
+		{
+			salida.put("ok",false);
+			salida.put("error","Zoho no devolvió un ID al crear el ticket.");
+			salida.put("respuesta",respCreate.toString());
+		}
+	}
+	catch (e)
+	{
+		info "[standalone] Excepción al crear -> " + e;
+		salida.put("ok",false);
+		salida.put("error","Excepción al crear el ticket: " + e.toString());
+	}
+
+	// =========================================================================
+	// ALTERNATIVA (NO activa) — llamar a post_create directo en vez de por workflow.
+	// Si el disparo por workflow resulta poco confiable (p. ej. el bug del lookup
+	// en diagnóstico) o querés ejecución inmediata y no asíncrona, se puede crear
+	// SIN trigger y llamar la función a mano:
+	//     respCreate = zoho.crm.createRecord("Problemas", dataMap);   // sin {"trigger":{"workflow"}}
+	//     nuevoId = ifnull(respCreate.get("id"), "");
+	//     if(nuevoId != "") { automation.problemas_post_create(nuevoId.toString()); }
+	// Ventaja: determinístico, corre en la misma ejecución. Desventaja: se saltea
+	// cualquier OTRO workflow de create sobre Problemas (hoy solo está Post-Create).
+	// =========================================================================
+
+	return salida.toString();
+}
