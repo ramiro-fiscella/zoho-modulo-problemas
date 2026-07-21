@@ -1,0 +1,15 @@
+// =============================================================================
+// Problemas - Listar tickets portal
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Independiente
+// Autenticación  : OAuth2 y Clave de API
+// Dispara / usa  : Webhook n8n POST /webhook/listar-mis-tickets
+// Firma conocida : standalone.listar_mis_tickets(String comercialMail)
+//
+// Qué hace: Lista los tickets del comercial en el portal. Filtra por (Email:equals:<mail>) — normaliza a minúscula. Devuelve {ok, tickets:[...]}. NO tocar el filtro por Email (ver docs/bugs.md).
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

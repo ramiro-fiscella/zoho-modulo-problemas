@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     WIDGET: reportar-problema
+     Uso: botón DENTRO de un módulo (Deals, Comisiones, Cajas, etc.).
+     El módulo y el registro origen se toman AUTOMÁTICAMENTE del contexto
+     (ZOHO.embeddedApp PageLoad). El usuario NO elige módulo ni busca legajo.
+     Archivos de este proyecto: js/app.js + css/style.css
+     ============================================================ -->
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportar Problema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://live.zwidgets.com/js-sdk/1.0.5/ZohoEmbededAppSDK.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Estilos del combobox de Tipo de problema (fuzzy + filtro blando).
+       Namespaced con #problema-* para no chocar con el CSS existente.
+       Se puede mover a la hoja de estilos del widget si se prefiere. -->
+  <style>
+    #problema-wrapper { position: relative; }
+    #problema-wrapper > input#problema {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid var(--color-border, #e0e0e0);
+      border-radius: var(--radius, 6px);
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--color-text, #1a1a2e);
+      background: var(--color-surface, #fafafa);
+      transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    #problema-wrapper > input#problema:focus {
+      outline: none;
+      border-color: var(--color-primary, #c0392b);
+      background: var(--color-bg, #fff);
+      box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+    }
+    #problema-lista {
+      position: absolute; left: 0; right: 0; top: calc(100% + 3px);
+      z-index: 60; margin: 0; padding: 4px 0; list-style: none;
+      max-height: 260px; overflow-y: auto;
+      background: var(--color-bg, #fff);
+      border: 1px solid var(--color-border, #e0e0e0);
+      border-radius: var(--radius, 6px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    #problema-lista.oculto { display: none; }
+    #problema-lista .pb-grupo {
+      padding: 7px 12px 3px; font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .04em;
+      color: var(--color-text-muted, #555);
+    }
+    #problema-lista .pb-item {
+      padding: 7px 12px; cursor: pointer; font-size: 13px;
+      color: var(--color-text, #1a1a2e);
+    }
+    #problema-lista .pb-item:hover,
+    #problema-lista .pb-item.focusado { background: var(--color-contexto-bg, #f4f6fb); }
+    #problema-lista .pb-item mark { background: #ffe08a; color: inherit; padding: 0 1px; border-radius: 2px; }
+    #problema-lista .pb-item-otro { font-style: italic; color: var(--color-text-muted, #555); }
+    #problema-lista .pb-vertodos {
+      padding: 8px 12px; cursor: pointer; font-size: 12.5px; font-weight: 500;
+      color: var(--color-primary, #c0392b);
+      border-top: 1px solid var(--color-border, #e0e0e0); margin-top: 4px;
+    }
+    #problema-lista .pb-vertodos:hover { text-decoration: underline; }
+    #problema-lista .pb-vacio { padding: 10px 12px; font-size: 12px; color: var(--color-text-muted, #555); }
+  </style>
+
+</head>
+
+<body>
+  <h2>🔴 Reportar Problema</h2>
+
+  <!-- Banner de contexto: se rellena dinámicamente desde app.js -->
+  <div id="contexto-origen" class="oculto" aria-label="Registro de origen"></div>
+
+  <form id="form-reportar" novalidate>
+
+    <label for="problema">Tipo de problema</label>
+    <div id="problema-wrapper">
+      <input type="text" id="problema" name="problema" autocomplete="off"
+        placeholder="Escribí o elegí un tipo de problema..." />
+      <ul id="problema-lista" class="oculto"></ul>
+    </div>
+
+    <label for="detalles">Detalles adicionales</label>
+    <textarea id="detalles" name="detalles" placeholder="Describí el problema con más detalle..."></textarea>
+
+    <label for="prioridad">Prioridad</label>
+    <select id="prioridad" name="prioridad">
+      <option value="" selected>— Automática (según tipo) —</option>
+      <option value="Alta">Alta</option>
+      <option value="Media">Media</option>
+      <option value="Baja">Baja</option>
+    </select>
+
+    <label for="archivo-input">Adjunto <span class="label-opcional">(opcional, máx. 10 MB)</span></label>
+    <div class="archivo-row">
+      <button type="button" id="btn-archivo">
+        <span>📎</span> Seleccionar archivo
+      </button>
+      <button type="button" id="archivo-clear" class="archivo-clear" style="display:none;"
+        aria-label="Quitar archivo">&times;</button>
+    </div>
+    <div id="archivo-preview" class="archivo-preview"></div>
+    <input type="file" id="archivo-input" name="archivo" style="display:none;" aria-hidden="true">
+
+    <div class="btn-row">
+      <button type="button" id="btn-cancelar">Cancelar</button>
+      <button type="button" id="btn-reportar">
+        <span class="btn-icon">●</span> Reportar
+      </button>
+    </div>
+
+  </form>
+
+  <div id="mensaje" class="mensaje-estado"></div>
+
+  <script src="js/app.js"></script>
+</body>
+
+</html>

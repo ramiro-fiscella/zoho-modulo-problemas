@@ -1,0 +1,290 @@
+{
+  "name": "crear-problemas",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "id": "79ba1ee8-66a0-40e6-a4ce-bc7dfe6f08a7",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1536,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Toma la respuesta cruda del nodo HTTP Request y arma { statusCode, body }\n// para que el nodo Respond to Webhook lo devuelva tal cual al portal.\n\nconst item = $input.first();\nconst data = item.json;\n\n// Caso 1: fallo de red/timeout/DNS -> el nodo HTTP quedó con continueOnFail\n// y devuelve el error acá en vez de tirar la ejecución entera.\nif (data.error) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo contactar a Zoho: ' + (data.error.message || JSON.stringify(data.error))\n      }\n    }\n  }];\n}\n\n// Caso 2: la llamada HTTP entró pero Zoho rechazó la ejecución de la función\n// (auth_type/zapikey inválido, función no encontrada, etc.) -> code != \"success\"\nif (data.code && data.code !== 'success') {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'Zoho no pudo ejecutar la función: ' + (data.message || data.code),\n        detalleZoho: data\n      }\n    }\n  }];\n}\n\n// Caso 3: todo OK a nivel HTTP/ejecución -> el resultado real de\n// problemas_create_standalone viene como STRING JSON en details.output\nlet salida;\ntry {\n  const outputStr = data.details && data.details.output;\n  salida = JSON.parse(outputStr);\n} catch (e) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo parsear la respuesta de la función: ' + e.message,\n        rawOutput: data.details ? data.details.output : data\n      }\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    statusCode: salida.ok ? 200 : 400,\n    body: salida\n  }\n}];\n"
+      },
+      "id": "48f9b80b-805b-4991-a523-054f18340ef8",
+      "name": "Parsear respuesta Zoho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.zohoapis.com/crm/v7/functions/problemas_create_standalone/actions/execute",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "auth_type",
+              "value": "apikey"
+            },
+            {
+              "name": "zapikey",
+              "value": "1003.3a57ca159bb90bb62434d0d918a6cfaa.60ef3c8652b98eded57b9347ad78cd12"
+            },
+            {
+              "name": "relacionadoCon",
+              "value": "={{ $json.body.relacionadoCon || '' }}"
+            },
+            {
+              "name": "idOrigen",
+              "value": "={{ $json.body.idOrigen || '' }}"
+            },
+            {
+              "name": "problema",
+              "value": "={{ $json.body.problema || '' }}"
+            },
+            {
+              "name": "detalles",
+              "value": "={{ $json.body.detalles || '' }}"
+            },
+            {
+              "name": "prioridad",
+              "value": "={{ $json.body.prioridad || '' }}"
+            },
+            {
+              "name": "reportadoPorId",
+              "value": "={{ $json.body.reportadoPorId || '' }}"
+            },
+            {
+              "name": "reportadoPorMail",
+              "value": "={{ $json.body.reportadoPorMail || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "1bd83e2e-d32b-44cf-80ad-3881bece2f04",
+      "name": "Zoho - problemas_create_standalone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        256
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crear-problemas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "593ca249-a836-4a94-ac5a-1dc8e3560fb9",
+      "name": "Webhook - crear-problemas",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        864,
+        256
+      ],
+      "webhookId": "crear-problemas"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "buscar-legajo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "384b70fb-3aa9-4fb2-89bd-f33f7b7ad31d",
+      "name": "Webhook - buscar-legajo",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        864,
+        480
+      ],
+      "webhookId": "buscar-legajo"
+    },
+    {
+      "parameters": {
+        "url": "https://www.zohoapis.com/crm/v7/functions/problemas_buscar_legajo/actions/execute",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "auth_type",
+              "value": "apikey"
+            },
+            {
+              "name": "zapikey",
+              "value": "1003.3a57ca159bb90bb62434d0d918a6cfaa.60ef3c8652b98eded57b9347ad78cd12"
+            },
+            {
+              "name": "relacionadoCon",
+              "value": "={{ $json.body.relacionadoCon || 'Trato' }}"
+            },
+            {
+              "name": "query",
+              "value": "={{ $json.body.query || '6231' }}"
+            },
+            {
+              "name": "comercialMail",
+              "value": "={{ $json.body.mail || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "248d9b74-a680-485c-a398-8e9daff90b2c",
+      "name": "Zoho - problemas_buscar_legajo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        480
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mismo parseo que en crear-problemas: toma la respuesta cruda del nodo\n// HTTP Request y arma { statusCode, body } para Respond to Webhook.\n\nconst item = $input.first();\nconst data = item.json;\n\n// Caso 1: fallo de red/timeout/DNS\nif (data.error) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo contactar a Zoho: ' + (data.error.message || JSON.stringify(data.error))\n      }\n    }\n  }];\n}\n\n// Caso 2: Zoho rechazó la ejecución de la función (auth_type/zapikey inválido, etc.)\nif (data.code && data.code !== 'success') {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'Zoho no pudo ejecutar la función: ' + (data.message || data.code),\n        detalleZoho: data\n      }\n    }\n  }];\n}\n\n// Caso 3: todo OK -> el resultado real de problemas_buscar_legajo viene como\n// STRING JSON en details.output\nlet salida;\ntry {\n  const outputStr = data.details && data.details.output;\n  salida = JSON.parse(outputStr);\n} catch (e) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo parsear la respuesta de la función: ' + e.message,\n        rawOutput: data.details ? data.details.output : data\n      }\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    statusCode: salida.ok ? 200 : 400,\n    body: salida\n  }\n}];\n"
+      },
+      "id": "998d6a88-7558-4cdd-a9ff-709cdcaec9b5",
+      "name": "Parsear respuesta Zoho (buscar-legajo)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "id": "9a9eec6b-fbec-4e2e-b52f-05a943a353e6",
+      "name": "Respond to Webhook (buscar-legajo)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1536,
+        480
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Parsear respuesta Zoho": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho - problemas_create_standalone": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta Zoho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - crear-problemas": {
+      "main": [
+        [
+          {
+            "node": "Zoho - problemas_create_standalone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - buscar-legajo": {
+      "main": [
+        [
+          {
+            "node": "Zoho - problemas_buscar_legajo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho - problemas_buscar_legajo": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta Zoho (buscar-legajo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear respuesta Zoho (buscar-legajo)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (buscar-legajo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a44de3a3-9c54-489a-af92-29914a5c8b97",
+  "meta": {
+    "instanceId": "346fa1a04533aea1523d07983716a493d94d6565ee64129176291207bcb1d378"
+  },
+  "id": "NOioCvi6KZJ664E7",
+  "tags": []
+}

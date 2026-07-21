@@ -1,0 +1,270 @@
+{
+  "name": "Problemas - listar y reabrir tickets",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "id": "d9602008-dfa7-4d66-a704-1cefb46727d0",
+      "name": "Respond to Webhook (reabrir-ticket)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mismo parseo que en crear-problemas / buscar-legajo.\n\nconst item = $input.first();\nconst data = item.json;\n\nif (data.error) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo contactar a Zoho: ' + (data.error.message || JSON.stringify(data.error))\n      }\n    }\n  }];\n}\n\nif (data.code && data.code !== 'success') {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'Zoho no pudo ejecutar la función: ' + (data.message || data.code),\n        detalleZoho: data\n      }\n    }\n  }];\n}\n\nlet salida;\ntry {\n  const outputStr = data.details && data.details.output;\n  salida = JSON.parse(outputStr);\n} catch (e) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo parsear la respuesta de la función: ' + e.message,\n        rawOutput: data.details ? data.details.output : data\n      }\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    statusCode: salida.ok ? 200 : 400,\n    body: salida\n  }\n}];\n"
+      },
+      "id": "4e152ea9-5840-4fee-84dc-afe61ace58e1",
+      "name": "Parsear respuesta Zoho (reabrir-ticket)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.zohoapis.com/crm/v7/functions/problemas_reabrir_ticket/actions/execute",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "auth_type",
+              "value": "apikey"
+            },
+            {
+              "name": "zapikey",
+              "value": "1003.3a57ca159bb90bb62434d0d918a6cfaa.60ef3c8652b98eded57b9347ad78cd12"
+            },
+            {
+              "name": "ticketId",
+              "value": "={{ $json.body.ticketId || '' }}"
+            },
+            {
+              "name": "comercialMail",
+              "value": "={{ $json.body.mail || '' }}"
+            },
+            {
+              "name": "motivo",
+              "value": "={{ $json.body.motivo || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "4760a60b-40e2-4af4-97d2-d17fa6ed4a5e",
+      "name": "Zoho - problemas_reabrir_ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        240
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reabrir-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bfa0f34e-7c57-4a76-bf7d-4d33c345aaf9",
+      "name": "Webhook - reabrir-ticket",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        240
+      ],
+      "webhookId": "reabrir-ticket"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "id": "40ac2202-98d0-43cc-ba80-0dafa96a615c",
+      "name": "Respond to Webhook (listar-mis-tickets)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mismo parseo que en crear-problemas / buscar-legajo.\n\nconst item = $input.first();\nconst data = item.json;\n\nif (data.error) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo contactar a Zoho: ' + (data.error.message || JSON.stringify(data.error))\n      }\n    }\n  }];\n}\n\nif (data.code && data.code !== 'success') {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'Zoho no pudo ejecutar la función: ' + (data.message || data.code),\n        detalleZoho: data\n      }\n    }\n  }];\n}\n\nlet salida;\ntry {\n  const outputStr = data.details && data.details.output;\n  salida = JSON.parse(outputStr);\n} catch (e) {\n  return [{\n    json: {\n      statusCode: 502,\n      body: {\n        ok: false,\n        error: 'No se pudo parsear la respuesta de la función: ' + e.message,\n        rawOutput: data.details ? data.details.output : data\n      }\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    statusCode: salida.ok ? 200 : 400,\n    body: salida\n  }\n}];\n"
+      },
+      "id": "ae051c99-9a54-488b-8c9b-9689689dda93",
+      "name": "Parsear respuesta Zoho (listar-mis-tickets)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.zohoapis.com/crm/v7/functions/problemas_listar_mis_tickets/actions/execute",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "auth_type",
+              "value": "apikey"
+            },
+            {
+              "name": "zapikey",
+              "value": "1003.3a57ca159bb90bb62434d0d918a6cfaa.60ef3c8652b98eded57b9347ad78cd12"
+            },
+            {
+              "name": "comercialMail",
+              "value": "={{ $json.body.mail || 'ramirofiscella@garantiaya.com.ar' }}"
+            },
+            {
+              "name": "fase",
+              "value": "={{ $json.body.fase || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "4c0d9090-6ed4-4d16-9aa1-063687e7f5db",
+      "name": "Zoho - problemas_listar_mis_tickets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "listar-mis-tickets",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f9cea50d-c7ab-4efe-880a-a6a2c6d1e9c7",
+      "name": "Webhook - listar-mis-tickets",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "listar-mis-tickets"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Parsear respuesta Zoho (reabrir-ticket)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (reabrir-ticket)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho - problemas_reabrir_ticket": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta Zoho (reabrir-ticket)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - reabrir-ticket": {
+      "main": [
+        [
+          {
+            "node": "Zoho - problemas_reabrir_ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear respuesta Zoho (listar-mis-tickets)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (listar-mis-tickets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho - problemas_listar_mis_tickets": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta Zoho (listar-mis-tickets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - listar-mis-tickets": {
+      "main": [
+        [
+          {
+            "node": "Zoho - problemas_listar_mis_tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "708e171d-f22e-41ba-8a3f-c0bd2a8328f5",
+  "meta": {
+    "instanceId": "346fa1a04533aea1523d07983716a493d94d6565ee64129176291207bcb1d378"
+  },
+  "id": "G0trX9k1kbr48Rl5",
+  "tags": []
+}

@@ -1,0 +1,15 @@
+// =============================================================================
+// Problemas - Agregar Comentario desde Portal
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Independiente
+// Autenticación  : Clave de API
+// Dispara / usa  : Webhook n8n POST /webhook/agregar-comentario
+// Firma conocida : standalone.problemas_agregar_comentario(String ticketId, String comercialMail, String texto)
+//
+// Qué hace: Agrega un comentario (nota con título 'Comentario portal: ...') a un ticket. Devuelve {ok, id} o {ok:false, error}.
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

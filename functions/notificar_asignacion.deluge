@@ -1,0 +1,15 @@
+// =============================================================================
+// Problemas - Notificar Asignación
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Asociado / Automatización
+// Autenticación  : Ninguna (corre en workflow)
+// Dispara / usa  : Workflow 'Asignación de problema' (al Modificar)
+// Firma conocida : automation.notificar_asignacion(String problemaId)
+//
+// Qué hace: Avisa por Cliq (bot) a la persona asignada cuando un ticket cambia de dueño/estado.
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

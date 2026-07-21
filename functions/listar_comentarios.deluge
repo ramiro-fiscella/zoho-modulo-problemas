@@ -1,0 +1,15 @@
+// =============================================================================
+// Problemas - Listar Comentarios en Portal
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Independiente
+// Autenticación  : Clave de API
+// Dispara / usa  : Webhook n8n POST /webhook/listar-comentarios
+// Firma conocida : standalone.problemas_listar_comentarios(String ticketId)
+//
+// Qué hace: Lista los comentarios de un ticket (notas del portal + notas del CRM). Devuelve {ok, comentarios:[{id,autor,texto,fecha}]}.
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

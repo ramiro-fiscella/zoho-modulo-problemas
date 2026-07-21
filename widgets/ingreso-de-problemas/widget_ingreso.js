@@ -1,37 +1,8 @@
-/* ─────────────────────────────────────────────────────────────────────────
-   Widget: Reportar Problema — Módulo Ingreso de Problemas  v5
-   ─────────────────────────────────────────────────────────────────────────
-   Cambios respecto a v4:
-   - Prioridad "Automática": el <select> arranca en value vacío. Cuando el
-     usuario no elige prioridad, el payload la omite y la función
-     problemas_post_create la resuelve según el mapeo del tipo de problema.
-     Si el usuario elige una explícita, esa gana.
-   - Fix Contactos: moduloBusqueda "Contacts" (nombre API real del módulo
-     estándar) y campoBusqueda "Full_Name" (antes "Contactos"/"Name", que no
-     existen → la búsqueda no devolvía resultados).
-   - El HTML ahora envuelve la búsqueda de legajo en #bloque-busqueda-legajo,
-     que es lo que setBloquesBusquedaVisible() oculta/muestra. Antes ese id no
-     existía y el bloque nunca se ocultaba en modo "Sin módulo / General".
-
-   Cambios de v4 (previos):
-   - Opción "Sin módulo / General" (clave __NINGUNO__): oculta la búsqueda de
-     legajo y omite Relacionado_con e ID_ticket_relacionado del payload.
-   ───────────────────────────────────────────────────────────────────────── */
-
-// ── Clave interna para el modo "sin módulo" ───────────────────────────────
 const CLAVE_NINGUNO = "__NINGUNO__";
 
-// ── Configuración de módulos ──────────────────────────────────────────────
-//
-//   relacionadoCon  → valor del picklist Relacionado_con en el módulo Problemas
-//   labelModulo     → texto visible en el <select> de módulo
-//   moduloBusqueda  → entidad de Zoho CRM sobre la que se busca el legajo
-//   campoBusqueda   → campo API sobre el que se hace la búsqueda de texto
-//   campoFase       → campo de fase a mostrar en el banner (null = no mostrar)
-//
-//   Para la entrada especial __NINGUNO__, moduloBusqueda / campoBusqueda /
-//   campoFase no se usan; el bloque de búsqueda queda oculto.
-//
+// Config de módulos origen. La clave es el API name del módulo en Zoho;
+// relacionadoCon es el valor que se escribe en Problemas.Relacionado_con
+// (sin tilde, alineado con app.js y problemas_post_create.deluge).
 const MODULO_CONFIG = {
     [CLAVE_NINGUNO]: {
         relacionadoCon: null,           // se omite del payload
@@ -48,23 +19,23 @@ const MODULO_CONFIG = {
         campoFase: "Stage",
     },
     Renovaciones: {
-        relacionadoCon: "Renovación",
+        relacionadoCon: "Renovacion",
         labelModulo: "Renovación",
         moduloBusqueda: "Renovaciones",
         campoBusqueda: "Name",
         campoFase: null,
     },
     Comisiones: {
-        relacionadoCon: "Comisión",
+        relacionadoCon: "Comision",
         labelModulo: "Comisión",
         moduloBusqueda: "Comisiones",
         campoBusqueda: "Name",
         campoFase: null,
     },
-    Riesgo: {
+    Riesgos: {
         relacionadoCon: "Riesgo",
         labelModulo: "Riesgo",
-        moduloBusqueda: "Riesgo",
+        moduloBusqueda: "Riesgos",
         campoBusqueda: "Name",
         campoFase: null,
     },
@@ -75,19 +46,26 @@ const MODULO_CONFIG = {
         campoBusqueda: "Name",
         campoFase: null,
     },
-    Contactos: {
+    Contacts: {
         relacionadoCon: "Contacto",
         labelModulo: "Contacto",
         moduloBusqueda: "Contacts",
         campoBusqueda: "Full_Name",
         campoFase: null,
     },
-    Inmobiliarias: {
+    Accounts: {
         relacionadoCon: "Inmobiliaria",
         labelModulo: "Inmobiliaria",
-        moduloBusqueda: "Inmobiliarias",
-        campoBusqueda: "Name",
+        moduloBusqueda: "Accounts",
+        campoBusqueda: "Account_Name",
         campoFase: null,
+    },
+    Cajas: {
+        relacionadoCon: "Caja",
+        labelModulo: "Caja",
+        moduloBusqueda: "Cajas",
+        campoBusqueda: "Name",
+        campoFase: "Estado",   // real; dejar null si no se quiere en el banner
     },
 };
 
@@ -195,7 +173,7 @@ function ocultarContexto() {
  */
 function setBloquesBusquedaVisible(visible) {
     const bloque = document.getElementById("bloque-busqueda-legajo");
-    if (!bloque) return;  // por si el HTML no lo tiene todavía
+    if (!bloque) return;
     bloque.style.display = visible ? "" : "none";
 }
 
@@ -209,8 +187,6 @@ function inicializarSelectorModulo() {
         const opt = document.createElement("option");
         opt.value = key;
         opt.textContent = cfg.labelModulo;
-        // Separador visual: la opción "Sin módulo" va primero (ya lo está por orden)
-        // Podés agregar un optgroup si el HTML lo soporta.
         select.appendChild(opt);
     });
 
@@ -231,23 +207,25 @@ function onCambioModulo() {
 
     // Reset UI
     cerrarDropdown();
+    cerrarDropdownProblema();
+    probMostrarTodos = false;
     setMensaje("", "");
 
-    // ── Caso: sin módulo seleccionado ─────────────────────────────────────
+    // Sin módulo seleccionado
     if (!moduloZoho) {
         ocultarContexto();
         setBloquesBusquedaVisible(false);
         return;
     }
 
-    // ── Caso: modo "Sin módulo / General" ─────────────────────────────────
+    // Modo "Sin módulo / General"
     if (moduloZoho === CLAVE_NINGUNO) {
         setBloquesBusquedaVisible(false);
         setContextoNinguno();
         return;
     }
 
-    // ── Caso: módulo con búsqueda de legajo ───────────────────────────────
+    // Módulo con búsqueda de legajo
     setBloquesBusquedaVisible(true);
     ocultarContexto();
     setEstadoBusqueda("idle");
@@ -452,15 +430,13 @@ function getFormData() {
     return {
         problema: document.getElementById("problema").value.trim(),
         detalles: document.getElementById("detalles").value.trim(),
-        // Vacío = "Automática": la función problemas_post_create asigna la
-        // prioridad según el mapeo del tipo de problema. Si el usuario elige
-        // una explícita (Alta/Media/Baja), esa gana sobre el mapeo.
+        // Vacío = "Automática": problemas_post_create asigna la prioridad según
+        // el mapeo del tipo. Si el usuario elige una explícita, esa gana.
         prioridad: document.getElementById("prioridad").value
     };
 }
 
 function validar({ problema, detalles }) {
-    // Siempre se requiere haber elegido alguna opción en el selector de módulo
     if (!moduloZoho || !moduloConfig) {
         setMensaje("⚠️ Elegí un módulo de destino (o 'Sin módulo / General').", "error");
         return false;
@@ -475,7 +451,7 @@ function validar({ problema, detalles }) {
 /**
  * Construye el payload.
  * En modo __NINGUNO__: omite Relacionado_con e ID_ticket_relacionado.
- * En el resto:        incluye Relacionado_con y, si existe, el ID de legajo.
+ * En el resto: incluye Relacionado_con y, si existe, el ID de legajo.
  */
 function buildPayload({ problema, detalles, prioridad }) {
     const payload = {
@@ -486,7 +462,7 @@ function buildPayload({ problema, detalles, prioridad }) {
     // Si viene vacía ("Automática"), se omite → la función la resuelve por mapeo.
     if (prioridad) payload["Prioridad"] = prioridad;
 
-    // Solo agregar Relacionado_con cuando hay módulo real seleccionado
+    // Relacionado_con solo cuando hay módulo real seleccionado
     if (moduloZoho !== CLAVE_NINGUNO && moduloConfig.relacionadoCon) {
         payload["Relacionado_con"] = moduloConfig.relacionadoCon;
 
@@ -536,10 +512,317 @@ function onClickReportar() {
         });
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Tipo de problema — combobox con fuzzy search + filtro blando por módulo
+// Catálogo (antes estaba como <optgroup> en el HTML), mapeo módulo→grupos y
+// toda la lógica del dropdown. IDÉNTICO en app.js y widget_ingreso.js.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PROBLEMAS_CATALOGO = [
+    {
+        grupo: "Conversación con Cliente", opciones: [
+            "No sabe el código de garantía",
+            "No se envía email con pre-aprobación",
+            "Cliente sin respuesta",
+            "Preaprobación caducada",
+        ]
+    },
+    {
+        grupo: "Entrega de Comisiones", opciones: [
+            "Comisión no entregada (vencida y pendiente)",
+            "Comisión no entregada a tiempo (fuera de término)",
+            "No se genera el ticket de comisiones",
+            "No se descuenta la comisión en Books",
+        ]
+    },
+    {
+        grupo: "Evaluación de Riesgos", opciones: [
+            "Resolución urgente de riesgos",
+            "Pedido de excepción comercial de riesgos",
+            "Hay que recotizar",
+            "No me deja enviar a evaluación / reevaluación",
+            "Error en el Cotizador",
+        ]
+    },
+    {
+        grupo: "Firmas de Locación", opciones: [
+            "Firman hoy y el cliente no pagó",
+            "Aún no se emitió el certificado",
+            "No se genera el evento de Zoho Sign",
+            "No trae pagarés / recibo",
+        ]
+    },
+    {
+        grupo: "Incumplimientos", opciones: [
+            "Incumplimiento no se pasa a realizado",
+            "Incumplimiento sin pagar",
+            "Incumplimiento pagado fuera de término",
+            "Monto de incumplimiento cubierto incorrecto",
+        ]
+    },
+    {
+        grupo: "Inmobiliarias", opciones: [
+            "Correo electrónico erróneo en inmobiliaria",
+            "Porcentaje de comisión incorrecto",
+            "Inmobiliaria no pertenece al comercial",
+            "No le llegó el correo del formulario",
+            "Email con certificado digital no se envía",
+            "No sale correo a inmobiliaria",
+        ]
+    },
+    {
+        grupo: "Pagos", opciones: [
+            "Fecha de pago incorrecta",
+            "Valor no coincide con lo esperado",
+            "Cliente pagó pero no figura como pago/venta",
+            "Diferencia parcial de pago (Mercado Pago)",
+            "No aparece el formulario de pagos",
+            "No puedo modificar o eliminar un pago",
+            "Factura queda en $0",
+            "No se genera la factura de anticipo",
+            "No se genera la domiciliación / débito automático",
+        ]
+    },
+    {
+        grupo: "Reembolsos & Devoluciones", opciones: [
+            "Solicitud de devolución / reembolso",
+        ]
+    },
+    {
+        grupo: "Sistemas", opciones: [
+            "Caída de proveedores",
+            "Ejecuciones recursivas",
+            "Errores en configuración",
+            "No pasa de fase",
+            "Fase errónea",
+        ]
+    },
+    {
+        grupo: "Renovaciones", opciones: [
+            "No se genera el aviso de renovación próxima",
+            "Renovación no pasa a estado 'Enviada'",
+            "El cliente rechazó la renovación y no se actualizó",
+            "No se genera el contrato de renovación",
+        ]
+    },
+    {
+        grupo: "Documentación y Contratos", opciones: [
+            "Contrato generado con datos incorrectos",
+            "Adjunto no cargó / quedó vacío",
+            "Falta firma de alguna de las partes",
+            "Documento generado duplicado",
+        ]
+    },
+    {
+        grupo: "Usuarios y Accesos", opciones: [
+            "Usuario no ve el módulo que debería",
+            "Campo o botón no aparece para el usuario",
+            "Usuario no puede editar un registro",
+            "Usuario nuevo sin acceso configurado",
+        ]
+    },
+    {
+        grupo: "Notificaciones", opciones: [
+            "No llega email al cliente en ninguna etapa",
+            "Email llega con datos en blanco o mal formateados",
+            "Notificación Cliq no se envía",
+            "El cliente recibe el mismo correo dos veces",
+        ]
+    },
+    {
+        grupo: "Bigin / Referidos", opciones: [
+            "Referido no se sincroniza con CRM",
+            "Comisión de referido no se genera",
+            "Referido asignado al comercial incorrecto",
+            "Error en integración con Bigin",
+        ]
+    },
+];
+
+const PROBLEMA_OTRO = "Otro";
+
+// Filtro blando: relacionadoCon -> grupos que se muestran primero.
+// PROVISIONAL — validar el mapeo con negocio (mismo criterio que el portal).
+const GRUPOS_POR_MODULO = {
+    Trato: ["Conversación con Cliente", "Firmas de Locación", "Pagos", "Documentación y Contratos"],
+    Renovacion: ["Renovaciones", "Pagos", "Documentación y Contratos"],
+    Comision: ["Entrega de Comisiones", "Pagos"],
+    Riesgo: ["Evaluación de Riesgos"],
+    Incumplimiento: ["Incumplimientos", "Pagos"],
+    Inmobiliaria: ["Inmobiliarias", "Notificaciones"],
+    Contacto: ["Conversación con Cliente", "Usuarios y Accesos"],
+    Caja: ["Pagos", "Reembolsos & Devoluciones"],
+};
+// Grupos transversales: se muestran siempre, aunque el módulo no los liste.
+const GRUPOS_SIEMPRE = ["Sistemas", "Notificaciones", "Usuarios y Accesos"];
+
+// Estado del combobox de problema
+let probDropdownAbierto = false;
+let probIndiceFocus = -1;
+let probMostrarTodos = false;
+
+// Normalización insensible a acentos/mayúsculas + match por tokens (fuzzy simple)
+function normalizarTexto(s) {
+    return String(s ?? "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().trim();
+}
+function matchFuzzy(texto, query) {
+    const t = normalizarTexto(texto);
+    const tokens = normalizarTexto(query).split(/\s+/).filter(Boolean);
+    return tokens.every(tok => t.includes(tok));
+}
+
+// relacionadoCon del módulo activo (o null si no hay / no soportado)
+function relacionadoConActual() {
+    return (moduloConfig && moduloConfig.relacionadoCon) ? moduloConfig.relacionadoCon : null;
+}
+
+// Grupos ordenados: relevantes al módulo primero, después el resto
+function ordenarGrupos(relacionadoCon) {
+    const relevantes = (GRUPOS_POR_MODULO[relacionadoCon] || []).slice();
+    GRUPOS_SIEMPRE.forEach(g => { if (!relevantes.includes(g)) relevantes.push(g); });
+    const resto = PROBLEMAS_CATALOGO.map(x => x.grupo).filter(g => !relevantes.includes(g));
+    return { relevantes, resto };
+}
+function opcionesDeGrupo(nombreGrupo) {
+    const g = PROBLEMAS_CATALOGO.find(x => x.grupo === nombreGrupo);
+    return g ? g.opciones : [];
+}
+
+// Resaltado de coincidencias (cosmético; usa los tokens tal cual los tipeó el usuario)
+function resaltarProb(texto, query) {
+    const safe = escapeHtml(texto);
+    const q = (query || "").trim();
+    if (!q) return safe;
+    const tokens = q.split(/\s+/).filter(Boolean)
+        .map(t => escapeHtml(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    if (!tokens.length) return safe;
+    return safe.replace(new RegExp("(" + tokens.join("|") + ")", "gi"), "<mark>$1</mark>");
+}
+
+// Render del dropdown según query + módulo activo
+function renderDropdownProblema(query) {
+    const lista = document.getElementById("problema-lista");
+    if (!lista) return;
+    lista.innerHTML = "";
+    probIndiceFocus = -1;
+
+    const q = (query || "").trim();
+    const rc = relacionadoConActual();
+    const hayFiltroModulo = !!rc && !!GRUPOS_POR_MODULO[rc];
+
+    let gruposAMostrar;
+    let mostrarVerTodos = false;
+
+    // Filtro por módulo (duro): con un módulo mapeado se muestran SOLO los grupos
+    // relacionados a ese módulo (+ transversales). Los NO relacionados no se listan.
+    // Aplica tanto a la vista inicial como a la búsqueda: el fuzzy también queda
+    // acotado al módulo, así no aparecen problemas de otros módulos al tipear.
+    // "Ver todos" es la única vía para ver el catálogo completo (escape opcional).
+    const acotarPorModulo = hayFiltroModulo && !probMostrarTodos;
+    if (acotarPorModulo) {
+        gruposAMostrar = ordenarGrupos(rc).relevantes;
+        mostrarVerTodos = true;
+    } else {
+        gruposAMostrar = PROBLEMAS_CATALOGO.map(x => x.grupo);
+    }
+
+    let totalItems = 0;
+    gruposAMostrar.forEach(nombreGrupo => {
+        let opciones = opcionesDeGrupo(nombreGrupo);
+        if (q) opciones = opciones.filter(op => matchFuzzy(op, q));
+        if (!opciones.length) return;
+
+        const header = document.createElement("li");
+        header.className = "pb-grupo";
+        header.textContent = nombreGrupo;
+        lista.appendChild(header);
+
+        opciones.forEach(op => {
+            const li = document.createElement("li");
+            li.className = "pb-item";
+            li.dataset.valor = op;
+            li.innerHTML = resaltarProb(op, q);
+            li.addEventListener("mousedown", e => { e.preventDefault(); seleccionarProblema(op); });
+            lista.appendChild(li);
+            totalItems++;
+        });
+    });
+
+    // "Otro" siempre disponible
+    if (!q || matchFuzzy(PROBLEMA_OTRO, q)) {
+        const liOtro = document.createElement("li");
+        liOtro.className = "pb-item pb-item-otro";
+        liOtro.dataset.valor = PROBLEMA_OTRO;
+        liOtro.innerHTML = resaltarProb(PROBLEMA_OTRO, q);
+        liOtro.addEventListener("mousedown", e => { e.preventDefault(); seleccionarProblema(PROBLEMA_OTRO); });
+        lista.appendChild(liOtro);
+        totalItems++;
+    }
+
+    if (mostrarVerTodos) {
+        const liVer = document.createElement("li");
+        liVer.className = "pb-vertodos";
+        liVer.textContent = "+ Ver todos los tipos";
+        liVer.addEventListener("mousedown", e => {
+            e.preventDefault();
+            probMostrarTodos = true;
+            renderDropdownProblema(document.getElementById("problema").value.trim());
+        });
+        lista.appendChild(liVer);
+    }
+
+    if (!totalItems && q) {
+        const vac = document.createElement("li");
+        vac.className = "pb-vacio";
+        vac.innerHTML = acotarPorModulo
+            ? `Sin coincidencias en este módulo para <strong>${escapeHtml(q)}</strong>. Usá "Ver todos los tipos" para buscar en el resto.`
+            : `Sin coincidencias para <strong>${escapeHtml(q)}</strong>. Se guardará el texto tal cual.`;
+        lista.appendChild(vac);
+    }
+
+    lista.classList.remove("oculto");
+    probDropdownAbierto = true;
+}
+
+function cerrarDropdownProblema() {
+    const lista = document.getElementById("problema-lista");
+    if (!lista) return;
+    lista.classList.add("oculto");
+    lista.innerHTML = "";
+    probDropdownAbierto = false;
+    probIndiceFocus = -1;
+}
+
+function seleccionarProblema(valor) {
+    const input = document.getElementById("problema");
+    if (input) input.value = valor;
+    cerrarDropdownProblema();
+    setMensaje("", "");
+}
+
+function moverFocoProblema(direccion) {
+    const items = document.querySelectorAll("#problema-lista .pb-item");
+    if (!items.length) return;
+    if (probIndiceFocus >= 0 && items[probIndiceFocus]) items[probIndiceFocus].classList.remove("focusado");
+    probIndiceFocus = direccion === "down"
+        ? Math.min(probIndiceFocus + 1, items.length - 1)
+        : Math.max(probIndiceFocus - 1, 0);
+    items[probIndiceFocus].classList.add("focusado");
+    items[probIndiceFocus].scrollIntoView({ block: "nearest" });
+}
+function confirmarFocoProblema() {
+    const items = document.querySelectorAll("#problema-lista .pb-item");
+    if (probIndiceFocus >= 0 && items[probIndiceFocus]) {
+        items[probIndiceFocus].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    }
+}
+
 // ── Inicialización ────────────────────────────────────────────────────────
 
 ZOHO.embeddedApp.on("PageLoad", () => {
-    console.log("[widget-ingreso] PageLoad — v5");
+    console.log("[widget-ingreso] PageLoad");
 
     inicializarSelectorModulo();
 
@@ -609,6 +892,29 @@ ZOHO.embeddedApp.on("PageLoad", () => {
         ZOHO.CRM.UI.Popup.close();
     });
     document.getElementById("btn-reportar").addEventListener("click", onClickReportar);
+
+    // ── Combobox de Tipo de problema (fuzzy + filtro blando por módulo) ────
+    const inputProblema = document.getElementById("problema");
+    if (inputProblema) {
+        inputProblema.addEventListener("focus", () => {
+            renderDropdownProblema(inputProblema.value.trim());
+        });
+        inputProblema.addEventListener("input", () => {
+            probMostrarTodos = false;
+            renderDropdownProblema(inputProblema.value.trim());
+        });
+        inputProblema.addEventListener("keydown", e => {
+            if (!probDropdownAbierto) return;
+            if (e.key === "ArrowDown") { e.preventDefault(); moverFocoProblema("down"); }
+            if (e.key === "ArrowUp") { e.preventDefault(); moverFocoProblema("up"); }
+            if (e.key === "Enter") { e.preventDefault(); confirmarFocoProblema(); }
+            if (e.key === "Escape") { cerrarDropdownProblema(); }
+        });
+        document.addEventListener("click", e => {
+            if (!e.target.closest("#problema-wrapper")) cerrarDropdownProblema();
+        });
+    }
+
 
     // ── File picker ───────────────────────────────────────────────────────
     const inputArchivo = document.getElementById("archivo-input");

@@ -1,0 +1,15 @@
+// =============================================================================
+// Problemas - Reabrir ticket portal
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Independiente
+// Autenticación  : Clave de API
+// Dispara / usa  : Portal Asesores → n8n (a confirmar path del webhook)
+// Firma conocida : standalone.reabrir_ticket_portal(String ticketId, String comercialMail, String motivo)
+//
+// Qué hace: Permite a los comerciales reabrir un ticket cerrado desde el portal.
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

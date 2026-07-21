@@ -1,0 +1,15 @@
+// =============================================================================
+// Problema - Buscar legajo portal
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Independiente
+// Autenticación  : Clave de API
+// Dispara / usa  : Portal Asesores → n8n (a confirmar path del webhook)
+// Firma conocida : standalone.buscar_legajo_portal(String modulo, String texto)
+//
+// Qué hace: Busca un legajo por módulo para el portal comercial (fuzzy/COQL). Simplifica la búsqueda de legajos al armar un ticket.
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

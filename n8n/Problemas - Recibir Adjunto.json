@@ -1,0 +1,133 @@
+{
+  "name": "Problemas - Recibir Adjunto",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "problemas-adjunto",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "28e0a7cd-5f4c-4539-8897-8b7138d3be94",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "problemas-adjunto-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.zohoapis.com/crm/v8/Problemas/{{ $json.body.id }}/Attachments",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "zohoOAuth2Api",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4eda4f82-a9d4-42e8-be43-3a2c9aada668",
+      "name": "Zoho CRM - Subir Adjunto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        80
+      ],
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "U3n2eD86WTlqiLCp",
+          "name": "Zoho account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"attachment_id\": $json.data[0].details.id, \"file_name\": $json.data[0].details.File_Name } }}",
+        "options": {}
+      },
+      "id": "b2a75a96-1543-4135-b60a-0a66c94a5529",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": false, \"error\": $json.error?.message || \"Error al subir adjunto a Zoho\" } }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "b81397ae-d663-4e4f-8b41-d32c627bb3f6",
+      "name": "Responder Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        288
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Zoho CRM - Subir Adjunto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho CRM - Subir Adjunto": {
+      "main": [
+        [
+          {
+            "node": "Responder OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c7affed5-3881-44aa-8456-64b96b320ae4",
+  "meta": {
+    "instanceId": "346fa1a04533aea1523d07983716a493d94d6565ee64129176291207bcb1d378"
+  },
+  "id": "oqWeU3gNjAbTesr0",
+  "tags": []
+}

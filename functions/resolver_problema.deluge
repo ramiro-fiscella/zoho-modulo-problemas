@@ -1,0 +1,15 @@
+// =============================================================================
+// Resolver Problema
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Asociado / Botón
+// Autenticación  : Botón de detalle
+// Dispara / usa  : Botón 'Resolver Problema' en el módulo Problemas
+// Firma conocida : button.resolver_problema(String problemaId)
+//
+// Qué hace: Cierra/resuelve un ticket desde un botón en la vista de detalle (setea Resolucion, Fecha_de_cierre, etc.).
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

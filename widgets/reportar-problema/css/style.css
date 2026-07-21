@@ -1,19 +1,19 @@
 /* ─── Variables ──────────────────────────────────────────────────────────── */
 :root {
-    --color-primary:      #c0392b;
+    --color-primary: #c0392b;
     --color-primary-dark: #a93226;
-    --color-primary-muted:#e0a09a;
-    --color-bg:           #ffffff;
-    --color-surface:      #fafafa;
-    --color-border:       #e0e0e0;
-    --color-text:         #1a1a2e;
-    --color-text-muted:   #555;
-    --color-cancel-bg:    #f0f0f0;
-    --color-cancel-text:  #444;
-    --color-contexto-bg:  #f4f6fb;
+    --color-primary-muted: #e0a09a;
+    --color-bg: #ffffff;
+    --color-surface: #fafafa;
+    --color-border: #e0e0e0;
+    --color-text: #1a1a2e;
+    --color-text-muted: #555;
+    --color-cancel-bg: #f0f0f0;
+    --color-cancel-text: #444;
+    --color-contexto-bg: #f4f6fb;
     --color-contexto-border: #3a6cca;
-    --radius:             6px;
-    --transition:         0.18s ease;
+    --radius: 6px;
+    --transition: 0.18s ease;
 }
 
 /* ─── Reset ──────────────────────────────────────────────────────────────── */
@@ -120,12 +120,22 @@ h2 {
     animation: skeleton-shimmer 1.2s ease-in-out infinite;
 }
 
-.skeleton-modulo { width: 60px; }
-.skeleton-nombre { width: 120px; }
+.skeleton-modulo {
+    width: 60px;
+}
+
+.skeleton-nombre {
+    width: 120px;
+}
 
 @keyframes skeleton-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* ─── Formulario ─────────────────────────────────────────────────────────── */

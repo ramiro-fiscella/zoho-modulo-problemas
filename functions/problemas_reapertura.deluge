@@ -1,0 +1,15 @@
+// =============================================================================
+// Problemas - reapertura
+// -----------------------------------------------------------------------------
+// Categoría Zoho : Asociado / Automatización
+// Autenticación  : Ninguna (corre en workflow)
+// Dispara / usa  : Workflow 'Reapertura de ticket' (al Modificar)
+// Firma conocida : automation.problemas_reapertura(String problemaId)
+//
+// Qué hace: Reabre un ticket: setea Fase=Reabierto, actualiza Fecha_de_asignacion y crea las notas de reapertura en el ticket y en el registro origen. (Ver bugs #1 y #3 en docs/bugs.md.)
+//
+// ⚠️ PLACEHOLDER — el código real de esta función todavía no está en el repo.
+//    Pegá acá el cuerpo exacto copiado desde Zoho (Setup → Functions), sin
+//    reformatear, y borrá este bloque de advertencia. Mantené el nombre de
+//    archivo tal cual para que el índice del README siga siendo válido.
+// =============================================================================

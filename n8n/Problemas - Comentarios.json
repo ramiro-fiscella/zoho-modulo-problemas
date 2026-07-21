@@ -1,0 +1,250 @@
+{
+  "name": "Problemas - Comentarios",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agregar-comentario",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0eb5ce5a-e363-4a9e-8119-537ab7789828",
+      "name": "Webhook agregar-comentario",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        192,
+        16
+      ],
+      "webhookId": "a1111111-1111-1111-1111-111111111111"
+    },
+    {
+      "parameters": {
+        "url": "https://www.zohoapis.com/crm/v7/functions/problemas_agregar_comentario/actions/execute",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "auth_type",
+              "value": "apikey"
+            },
+            {
+              "name": "zapikey",
+              "value": "1003.3a57ca159bb90bb62434d0d918a6cfaa.60ef3c8652b98eded57b9347ad78cd12"
+            },
+            {
+              "name": "ticketId",
+              "value": "={{ $json.body.ticketId }}"
+            },
+            {
+              "name": "comercialMail",
+              "value": "={{ $json.body.comercialMail }}"
+            },
+            {
+              "name": "texto",
+              "value": "={{ $json.body.texto }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "124a9320-e7b9-420a-86a6-07e9bec99230",
+      "name": "Zoho problemas_agregar_comentario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nlet salida;\ntry {\n  salida = JSON.parse(data.details.output);\n} catch (e) {\n  return [{ json: { statusCode: 500, body: { ok: false, error: 'No se pudo parsear la respuesta de la funcion: ' + e.message, rawOutput: data.details ? data.details.output : data } } }];\n}\nreturn [{ json: { statusCode: salida.ok ? 200 : 400, body: salida } }];"
+      },
+      "id": "01de906c-73e2-4a5e-9bf7-7d675b646af8",
+      "name": "Parsear respuesta (agregar)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "id": "28b32e18-ab4f-453c-b548-21e8197a4033",
+      "name": "Respond agregar-comentario",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "listar-comentarios",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "86716046-8ad4-494b-aecc-399e9920c24c",
+      "name": "Webhook listar-comentarios",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        192,
+        304
+      ],
+      "webhookId": "b1111111-1111-1111-1111-111111111111"
+    },
+    {
+      "parameters": {
+        "url": "https://www.zohoapis.com/crm/v7/functions/problemas_listar_comentarios/actions/execute",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "auth_type",
+              "value": "apikey"
+            },
+            {
+              "name": "zapikey",
+              "value": "1003.3a57ca159bb90bb62434d0d918a6cfaa.60ef3c8652b98eded57b9347ad78cd12"
+            },
+            {
+              "name": "ticketId",
+              "value": "={{ $json.body.ticketId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c7b3a630-2af5-4c05-bdd1-f95b08ba9490",
+      "name": "Zoho problemas_listar_comentarios",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nlet salida;\ntry {\n  salida = JSON.parse(data.details.output);\n} catch (e) {\n  return [{ json: { statusCode: 500, body: { ok: false, error: 'No se pudo parsear la respuesta de la funcion: ' + e.message, rawOutput: data.details ? data.details.output : data } } }];\n}\nreturn [{ json: { statusCode: salida.ok ? 200 : 400, body: salida } }];"
+      },
+      "id": "ad92075f-b8f6-4657-9a45-d13476b820fb",
+      "name": "Parsear respuesta (listar)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "id": "580e1027-d299-4d36-a01a-fe9fa08f6304",
+      "name": "Respond listar-comentarios",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook agregar-comentario": {
+      "main": [
+        [
+          {
+            "node": "Zoho problemas_agregar_comentario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho problemas_agregar_comentario": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta (agregar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear respuesta (agregar)": {
+      "main": [
+        [
+          {
+            "node": "Respond agregar-comentario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook listar-comentarios": {
+      "main": [
+        [
+          {
+            "node": "Zoho problemas_listar_comentarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho problemas_listar_comentarios": {
+      "main": [
+        [
+          {
+            "node": "Parsear respuesta (listar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear respuesta (listar)": {
+      "main": [
+        [
+          {
+            "node": "Respond listar-comentarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "42db20ca-4575-4939-95c4-6aa291d70fb8",
+  "meta": {
+    "instanceId": "346fa1a04533aea1523d07983716a493d94d6565ee64129176291207bcb1d378"
+  },
+  "id": "Vqt6yLubAZbaHag2",
+  "tags": []
+}
