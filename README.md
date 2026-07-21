@@ -5,9 +5,6 @@ fallos de automatización o problemas de proceso; Sistemas/Administración los g
 en un módulo dedicado del CRM. Los comerciales también los ven y comentan desde un
 **Portal** propio.
 
-La doc funcional (campos, SLA, decisiones de negocio) vive en Notion. Este repo es
-solo **código + integración**.
-
 ## Mapa
 
 ```
@@ -30,12 +27,9 @@ docs/             Análisis, roadmap, bugs y videos demo
 ## Estado
 
 - ✅ En producción: alta por botón, post-create, portal (listar/crear/comentar).
-- ⬜ Código pendiente de subir: 8 funciones están como stub documentado
-  (`functions/README.md` marca cuáles). Pegar el cuerpo real desde Zoho.
 - 🐞 Bugs abiertos y fixes acordados: `docs/bugs.md`. Pendientes: `docs/ROADMAP.md`.
 
 ## Cómo se despliega
 
 Cada carpeta de `widgets/` se sube como su widget en Zoho; cada `.deluge` de `functions/`
-es una función; las reglas de `workflows/` se configuran en Setup → Automation. El
-historial de versiones lo da git, no sufijos en nombres de carpeta.
+es una función; las reglas de `workflows/` se configuran en Setup → Automation.
